@@ -1,0 +1,45 @@
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Supabase
+.supabase/
+supabase/.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Secrets y keys
+*.pem
+*.key
+secrets/
+
+# Sistema operativo
+Thumbs.db
+.cache/
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
