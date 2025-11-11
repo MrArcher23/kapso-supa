@@ -340,6 +340,212 @@ En la terminal donde ejecutaste `supabase functions logs`, verás:
 [kapso-webhook] Lead guardado exitosamente
 ```
 
+## 🎁 Bonus: Configurar MCP de Supabase en Cursor
+
+### ¿Qué es MCP?
+
+El **Model Context Protocol (MCP)** es un estándar que permite conectar herramientas de IA (como Cursor) con plataformas como Supabase. Una vez conectado, puedes interactuar con tu base de datos y proyecto usando **lenguaje natural** directamente desde tu IDE.
+
+Según la [documentación oficial de Supabase](https://supabase.com/docs/guides/getting-started/mcp), MCP permite que tu asistente de IA consulte y gestione tu proyecto de Supabase de forma inteligente.
+
+### Beneficios para Este Proyecto
+
+Con MCP configurado en Cursor, podrás:
+
+✅ **Consultar la tabla `leads`** con preguntas naturales
+   - "Muéstrame los últimos 5 leads capturados"
+   - "¿Cuántos leads tengo por cada tipo de interés?"
+   - "¿Qué leads tienen email de Gmail?"
+
+✅ **Depurar la Edge Function** `kapso-webhook`
+   - "Explícame cómo funciona la máquina de estados"
+   - "¿Por qué no se está guardando el email?"
+
+✅ **Escribir migraciones SQL** con ayuda de IA
+   - "Crea una migración para agregar campo 'empresa' a la tabla leads"
+   - "Ayúdame a optimizar el índice de phone_number"
+
+✅ **Explorar estados de conversación**
+   - "Muéstrame leads que están en WAITING_FOR_EMAIL"
+   - "¿Cuál es la estructura del campo conversation_state?"
+
+### Instalación
+
+Tienes 3 opciones para configurar MCP:
+
+#### Opción 1: Instalación con Un Click (Recomendada)
+
+Esta es la forma más rápida y sencilla:
+
+1. Ve a tu [Supabase Dashboard](https://supabase.com/dashboard)
+2. Selecciona tu proyecto `kapso-leads`
+3. Ve a la sección **AI Tools** o **MCP**
+4. Haz clic en **"Add to Cursor"**
+5. Se abrirá tu navegador para autenticarte
+6. Autoriza el acceso a tu organización de Supabase
+7. ¡Listo! Cursor ahora puede acceder a tu proyecto
+
+**Nota**: La autenticación se hace vía OAuth, no necesitas generar tokens manualmente.
+
+#### Opción 2: Configuración Manual
+
+Si prefieres configurar manualmente:
+
+1. Abre tu editor Cursor
+2. Ve a **Settings** → **Model Context Protocol**
+3. O edita directamente el archivo `.cursor/mcp.json` en tu directorio home
+4. Agrega esta configuración:
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp"
+    }
+  }
+}
+```
+
+5. Reinicia Cursor
+6. La primera vez que uses MCP, se abrirá un navegador para autenticarte
+
+#### Opción 3: Scoped al Proyecto (Más Segura)
+
+Para mayor seguridad, puedes limitar el acceso solo a tu proyecto específico en modo lectura:
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=TU_PROJECT_REF&readonly=true"
+    }
+  }
+}
+```
+
+**¿Dónde encuentro `project_ref`?**
+- En Supabase Dashboard → Settings → General → Reference ID
+
+**Ventajas del modo `readonly=true`:**
+- Solo consultas SELECT
+- No puede modificar o eliminar datos
+- Perfecto para exploración segura
+
+### Uso con Ejemplos
+
+Una vez configurado, puedes hacer preguntas directamente en Cursor:
+
+**Consultas de Datos:**
+```
+// En Cursor Chat, escribe:
+"Muéstrame todos los leads de la última hora"
+"¿Cuántos leads tengo en total?"
+"Agrupa los leads por interés y muéstrame el conteo"
+```
+
+**Exploración de Código:**
+```
+"Explícame paso a paso cómo funciona kapso-webhook/index.ts"
+"¿Qué hace la función processMessage?"
+"Muéstrame un ejemplo de cómo se guarda un lead"
+```
+
+**Debugging:**
+```
+"¿Por qué un lead podría quedarse en WAITING_FOR_EMAIL?"
+"Muéstrame los logs de error de la Edge Function"
+"¿Qué pasa si un usuario envía un email inválido?"
+```
+
+**Desarrollo:**
+```
+"Crea una query para obtener leads de los últimos 7 días"
+"Ayúdame a agregar un campo 'telefono' a la tabla leads"
+"Sugiere índices para mejorar el rendimiento de la tabla"
+```
+
+### Consideraciones de Seguridad
+
+⚠️ **IMPORTANTE**: Lee las [mejores prácticas de seguridad de Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp#security-risks) antes de usar.
+
+**Recomendaciones clave:**
+
+1. **🚫 No conectes a producción**
+   - Usa MCP solo en tu proyecto de desarrollo
+   - Si tienes datos reales, usa una copia o datos de prueba
+
+2. **👥 No lo des a clientes**
+   - MCP opera con tus permisos de desarrollador
+   - Solo para uso interno del equipo
+
+3. **📖 Modo Read-Only**
+   - Si trabajas con datos sensibles, usa `readonly=true`
+   - Previene modificaciones accidentales
+
+4. **🎯 Scope al Proyecto**
+   - Limita el acceso a un solo proyecto
+   - Evita que el LLM acceda a otros proyectos
+
+5. **✋ Aprobación Manual**
+   - Mantén activada la aprobación manual de tool calls en Cursor
+   - Revisa cada acción antes de ejecutarla
+
+6. **🌿 Usa Branching**
+   - Considera usar [Supabase Branching](https://supabase.com/docs/guides/platform/branching) para desarrollo
+   - Prueba cambios en una rama antes de aplicarlos
+
+### Verificar que Funciona
+
+Después de configurar MCP:
+
+1. Abre Cursor Chat (Cmd/Ctrl + L)
+2. Escribe: "Muéstrame la estructura de la tabla leads"
+3. Cursor debería consultar Supabase y mostrarte los campos
+4. Si pide autorización, acepta el tool call
+
+Si funciona correctamente, verás algo como:
+
+```
+La tabla 'leads' tiene los siguientes campos:
+- id (uuid)
+- phone_number (text)
+- name (text)
+- email (text)
+- interest (text)
+- conversation_state (jsonb)
+- created_at (timestamp)
+- updated_at (timestamp)
+```
+
+### Troubleshooting MCP
+
+**MCP no se conecta:**
+```bash
+# Verifica que Cursor tenga la configuración correcta
+cat ~/.cursor/mcp.json
+
+# Reinicia Cursor completamente
+# Intenta autenticarte de nuevo
+```
+
+**Error de autenticación:**
+- Revoca el acceso en [Supabase Dashboard](https://supabase.com/dashboard) → Settings → OAuth Apps
+- Vuelve a autorizar desde Cursor
+
+**No puede acceder a mi proyecto:**
+- Verifica que el `project_ref` sea correcto
+- Asegúrate de haber autorizado la organización correcta
+- Revisa que tu cuenta tenga permisos en el proyecto
+
+**Queries muy lentas:**
+- MCP hace queries reales a tu base de datos
+- Si tienes muchos datos, las queries pueden tardar
+- Considera agregar límites: "últimos 10 registros"
+
+Para más ayuda, consulta la [documentación oficial de Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp).
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```

@@ -57,6 +57,61 @@ supabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
    - URL: `https://TU_PROJECT_REF.supabase.co/functions/v1/kapso-webhook`
    - Eventos: `messages`
 
+## Configurar MCP de Supabase (Opcional)
+
+**¿Qué es MCP?** Model Context Protocol te permite consultar tu base de datos usando lenguaje natural desde Cursor.
+
+### Instalación Rápida
+
+**Opción 1: Un Click (Recomendada)**
+1. Ve a [Supabase Dashboard](https://supabase.com/dashboard) → tu proyecto
+2. Click en **"AI Tools"** o **"MCP"**
+3. Click en **"Add to Cursor"**
+4. Autoriza en el navegador
+5. ¡Listo!
+
+**Opción 2: Manual**
+```bash
+# Edita ~/.cursor/mcp.json
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp"
+    }
+  }
+}
+# Reinicia Cursor
+```
+
+**Opción 3: Modo Seguro (Solo Lectura)**
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=TU_PROJECT_REF&readonly=true"
+    }
+  }
+}
+```
+
+### Ejemplos de Uso
+
+Una vez configurado, en Cursor Chat puedes escribir:
+
+```
+"Muéstrame los últimos 5 leads"
+"¿Cuántos leads tengo por cada interés?"
+"Explícame cómo funciona kapso-webhook/index.ts"
+"Crea una query para leads de los últimos 7 días"
+```
+
+**⚠️ Importante:**
+- Solo para desarrollo, NO producción
+- Usa modo `readonly=true` para seguridad
+- Aprueba manualmente cada tool call en Cursor
+
+📖 **Más detalles**: Ver sección "Bonus: Configurar MCP" en el [README.md](README.md#-bonus-configurar-mcp-de-supabase-en-cursor)
+
 ## Probar el Sistema
 
 ```bash
