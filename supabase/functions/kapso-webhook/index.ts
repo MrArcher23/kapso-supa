@@ -281,7 +281,7 @@ async function sendWhatsAppMessage(
   }
 
   try {
-    const url = `${kapsoBaseUrl}/${phoneNumberId}/messages`
+    const url = `${kapsoBaseUrl}/v21.0/${phoneNumberId}/messages`
     let payload: any
 
     if (useButtons && buttons.length > 0) {
