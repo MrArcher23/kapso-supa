@@ -1,14 +1,13 @@
 /**
  * Script de ejemplo para enviar mensaje inicial via Kapso
  * 
- * Este script demuestra cómo usar el SDK de Kapso para enviar
- * mensajes de WhatsApp de forma programática.
+ * Este script demuestra cómo usar la API de Kapso (WhatsApp Cloud API) directamente
+ * para enviar mensajes de WhatsApp de forma programática usando fetch.
  * 
  * Uso:
  *   npm run example
  */
 
-import { WhatsAppClient } from '@kapso/whatsapp-cloud-api'
 import * as dotenv from 'dotenv'
 
 // Cargar variables de entorno
@@ -25,11 +24,28 @@ if (!KAPSO_API_KEY || !KAPSO_PHONE_NUMBER_ID) {
   process.exit(1)
 }
 
-// Crear cliente de Kapso
-const client = new WhatsAppClient({
-  baseUrl: KAPSO_BASE_URL,
-  kapsoApiKey: KAPSO_API_KEY
-})
+/**
+ * Función helper para hacer requests a la API de Kapso
+ */
+async function kapsoRequest(endpoint: string, body: any) {
+  const url = `${KAPSO_BASE_URL}/${KAPSO_PHONE_NUMBER_ID}/${endpoint}`
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${KAPSO_API_KEY}`
+    },
+    body: JSON.stringify(body)
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Kapso API Error: ${response.status} - ${error}`)
+  }
+
+  return response.json()
+}
 
 /**
  * Envía un mensaje de texto simple
@@ -38,11 +54,18 @@ async function sendTextMessage(to: string, message: string) {
   try {
     console.log(`📤 Enviando mensaje a ${to}...`)
     
-    const response = await client.messages.sendText({
-      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
+    const payload = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
       to: to,
-      body: message
-    })
+      type: 'text',
+      text: {
+        preview_url: false,
+        body: message
+      }
+    }
+
+    const response = await kapsoRequest('messages', payload)
 
     console.log('✅ Mensaje enviado exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -56,27 +79,37 @@ async function sendTextMessage(to: string, message: string) {
 /**
  * Envía un mensaje con botones interactivos
  */
-async function sendButtonMessage(to: string, bodyText: string, buttons: Array<{id: string, title: string}>) {
+async function sendButtonMessage(
+  to: string, 
+  bodyText: string, 
+  buttons: Array<{id: string, title: string}>
+) {
   try {
     console.log(`📤 Enviando mensaje con botones a ${to}...`)
     
-    const response = await client.messages.sendInteractive({
-      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
+    const payload = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
       to: to,
-      type: 'button',
-      body: {
-        text: bodyText
-      },
-      action: {
-        buttons: buttons.map(btn => ({
-          type: 'reply' as const,
-          reply: {
-            id: btn.id,
-            title: btn.title
-          }
-        }))
+      type: 'interactive',
+      interactive: {
+        type: 'button',
+        body: {
+          text: bodyText
+        },
+        action: {
+          buttons: buttons.slice(0, 3).map(btn => ({
+            type: 'reply',
+            reply: {
+              id: btn.id,
+              title: btn.title.substring(0, 20) // Max 20 caracteres
+            }
+          }))
+        }
       }
-    })
+    }
+
+    const response = await kapsoRequest('messages', payload)
 
     console.log('✅ Mensaje con botones enviado exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -94,12 +127,18 @@ async function sendImageMessage(to: string, imageUrl: string, caption?: string) 
   try {
     console.log(`📤 Enviando imagen a ${to}...`)
     
-    const response = await client.messages.sendImage({
-      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
+    const payload = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
       to: to,
-      link: imageUrl,
-      caption: caption
-    })
+      type: 'image',
+      image: {
+        link: imageUrl,
+        ...(caption && { caption })
+      }
+    }
+
+    const response = await kapsoRequest('messages', payload)
 
     console.log('✅ Imagen enviada exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -187,4 +226,3 @@ export {
   sendButtonMessage,
   sendImageMessage
 }
-

@@ -22,12 +22,26 @@ git push -u origin main
 # Instalar dependencias
 npm install
 
-# Instalar Supabase CLI (si no lo tienes)
-npm install -g supabase
+# Instalar Supabase CLI
+# Elige el método según tu sistema operativo:
+
+# macOS (usando Homebrew)
+brew install supabase/tap/supabase
+
+# Linux (usando Homebrew en Linux)
+brew install supabase/tap/supabase
+
+# O descarga el binario directamente
+# https://github.com/supabase/cli/releases
+
+# Verificar instalación
+supabase --version
 
 # Autenticarte con Supabase
 supabase login
 ```
+
+**Nota**: Ya no se puede instalar Supabase CLI con `npm install -g supabase`.
 
 ## Configuración Rápida de Supabase
 
@@ -53,7 +67,7 @@ supabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
 1. **Crear cuenta**: https://dashboard.kapso.ai
 2. **Obtener API Key**: Dashboard → Settings → API Keys
 3. **Conectar WhatsApp**: Dashboard → Sandbox (para pruebas)
-4. **Configurar Webhook**: 
+4. **Configurar Webhook**:
    - URL: `https://TU_PROJECT_REF.supabase.co/functions/v1/kapso-webhook`
    - Eventos: `messages`
 
@@ -64,6 +78,7 @@ supabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
 ### Instalación Rápida
 
 **Opción 1: Un Click (Recomendada)**
+
 1. Ve a [Supabase Dashboard](https://supabase.com/dashboard) → tu proyecto
 2. Click en **"AI Tools"** o **"MCP"**
 3. Click en **"Add to Cursor"**
@@ -71,6 +86,7 @@ supabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
 5. ¡Listo!
 
 **Opción 2: Manual**
+
 ```bash
 # Edita ~/.cursor/mcp.json
 {
@@ -84,6 +100,7 @@ supabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
 ```
 
 **Opción 3: Modo Seguro (Solo Lectura)**
+
 ```json
 {
   "mcpServers": {
@@ -106,6 +123,7 @@ Una vez configurado, en Cursor Chat puedes escribir:
 ```
 
 **⚠️ Importante:**
+
 - Solo para desarrollo, NO producción
 - Usa modo `readonly=true` para seguridad
 - Aprueba manualmente cada tool call en Cursor
@@ -160,6 +178,7 @@ Bot: "¡Gracias! Hemos registrado tu información..."
 ## Troubleshooting Rápido
 
 **Bot no responde:**
+
 ```bash
 # Verificar logs
 supabase functions logs kapso-webhook
@@ -172,6 +191,7 @@ supabase functions deploy kapso-webhook
 ```
 
 **Error de base de datos:**
+
 ```bash
 # Verificar que la migración se aplicó
 supabase db diff
@@ -181,6 +201,7 @@ supabase db push
 ```
 
 **Error en script de ejemplo:**
+
 ```bash
 # Verificar que .env existe y tiene valores correctos
 cat .env
@@ -223,4 +244,3 @@ supabase functions list
 ---
 
 **Lee el README.md completo para más detalles** 📖
-

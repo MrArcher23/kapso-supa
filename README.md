@@ -26,7 +26,7 @@ Este proyecto es un ejercicio práctico que demuestra cómo integrar **Kapso** (
                                                           ├─> Valida Datos
                                                           ├─> Responde vía Kapso
                                                           └─> Guarda en DB
-                                                          
+
                                                   ┌──────────────────┐
                                                   │   PostgreSQL     │
                                                   │  (Tabla Leads)   │
@@ -86,12 +86,29 @@ Antes de comenzar, asegúrate de tener:
 ### 1.2 Instalar Supabase CLI y Autenticarte
 
 ```bash
-# Si no lo has instalado
-npm install -g supabase
+# Instalar Supabase CLI según tu sistema operativo:
+
+# macOS (usando Homebrew)
+brew install supabase/tap/supabase
+
+# Linux (usando Homebrew en Linux)
+brew install supabase/tap/supabase
+
+# Windows (usando Scoop)
+scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+scoop install supabase
+
+# O descarga el binario directamente desde:
+# https://github.com/supabase/cli/releases
+
+# Verificar instalación
+supabase --version
 
 # Autenticarte con Supabase
 supabase login
 ```
+
+**⚠️ Importante**: Ya no se puede instalar Supabase CLI con `npm install -g supabase`. Usa uno de los métodos anteriores.
 
 ### 1.3 Vincular tu Proyecto Local con Supabase
 
@@ -104,6 +121,7 @@ supabase link --project-ref TU_PROJECT_REF
 ```
 
 **¿Dónde encuentro mi `project-ref`?**
+
 - En Supabase Dashboard → Settings → General → Reference ID
 
 ### 1.4 Crear la Tabla de Leads
@@ -117,16 +135,16 @@ supabase db push
 
 Esto creará la tabla `leads` con la siguiente estructura:
 
-| Campo               | Tipo      | Descripción                          |
-|---------------------|-----------|--------------------------------------|
-| `id`                | UUID      | Identificador único (PK)             |
-| `phone_number`      | TEXT      | Número de teléfono del lead          |
-| `name`              | TEXT      | Nombre del lead                      |
-| `email`             | TEXT      | Email del lead                       |
-| `interest`          | TEXT      | Interés seleccionado (nullable)      |
-| `conversation_state`| JSONB     | Estado de la conversación            |
-| `created_at`        | TIMESTAMP | Fecha de creación                    |
-| `updated_at`        | TIMESTAMP | Fecha de última actualización        |
+| Campo                | Tipo      | Descripción                     |
+| -------------------- | --------- | ------------------------------- |
+| `id`                 | UUID      | Identificador único (PK)        |
+| `phone_number`       | TEXT      | Número de teléfono del lead     |
+| `name`               | TEXT      | Nombre del lead                 |
+| `email`              | TEXT      | Email del lead                  |
+| `interest`           | TEXT      | Interés seleccionado (nullable) |
+| `conversation_state` | JSONB     | Estado de la conversación       |
+| `created_at`         | TIMESTAMP | Fecha de creación               |
+| `updated_at`         | TIMESTAMP | Fecha de última actualización   |
 
 ### 1.5 Desplegar la Edge Function
 
@@ -155,6 +173,7 @@ supabase functions list
 ```
 
 Tu URL será algo como:
+
 ```
 https://PROJECT_REF.supabase.co/functions/v1/kapso-webhook
 ```
@@ -247,11 +266,11 @@ KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp
 
 **¿Dónde encuentro estos valores?**
 
-- **SUPABASE_URL** y **SUPABASE_ANON_KEY**: 
+- **SUPABASE_URL** y **SUPABASE_ANON_KEY**:
   - Supabase Dashboard → Settings → API
-- **KAPSO_API_KEY**: 
+- **KAPSO_API_KEY**:
   - Del Paso 2.2
-- **KAPSO_PHONE_NUMBER_ID**: 
+- **KAPSO_PHONE_NUMBER_ID**:
   - Del Paso 2.3
 
 ### 3.3 Verificar el Despliegue
@@ -268,34 +287,40 @@ Deja esta terminal abierta para monitorear los logs mientras pruebas.
 ### 4.1 Probar con WhatsApp
 
 1. **Envía un mensaje** desde WhatsApp al número conectado en Kapso:
+
    ```
    Hola
    ```
 
 2. **El bot debería responder**:
+
    ```
    ¡Bienvenido! 👋 Para ayudarte mejor, ¿cuál es tu nombre?
    ```
 
 3. **Responde con tu nombre**:
+
    ```
    Juan Pérez
    ```
 
 4. **El bot preguntará por tu email**:
+
    ```
    Encantado, Juan Pérez. ¿Cuál es tu correo electrónico?
    ```
 
 5. **Proporciona tu email**:
+
    ```
    juan@example.com
    ```
 
 6. **El bot mostrará botones interactivos**:
+
    ```
    Perfecto, Juan. ¿En qué podemos ayudarte?
-   
+
    🛍️ Información sobre productos
    💰 Consulta de precios
    📞 Agendar una llamada
@@ -353,21 +378,25 @@ Según la [documentación oficial de Supabase](https://supabase.com/docs/guides/
 Con MCP configurado en Cursor, podrás:
 
 ✅ **Consultar la tabla `leads`** con preguntas naturales
-   - "Muéstrame los últimos 5 leads capturados"
-   - "¿Cuántos leads tengo por cada tipo de interés?"
-   - "¿Qué leads tienen email de Gmail?"
+
+- "Muéstrame los últimos 5 leads capturados"
+- "¿Cuántos leads tengo por cada tipo de interés?"
+- "¿Qué leads tienen email de Gmail?"
 
 ✅ **Depurar la Edge Function** `kapso-webhook`
-   - "Explícame cómo funciona la máquina de estados"
-   - "¿Por qué no se está guardando el email?"
+
+- "Explícame cómo funciona la máquina de estados"
+- "¿Por qué no se está guardando el email?"
 
 ✅ **Escribir migraciones SQL** con ayuda de IA
-   - "Crea una migración para agregar campo 'empresa' a la tabla leads"
-   - "Ayúdame a optimizar el índice de phone_number"
+
+- "Crea una migración para agregar campo 'empresa' a la tabla leads"
+- "Ayúdame a optimizar el índice de phone_number"
 
 ✅ **Explorar estados de conversación**
-   - "Muéstrame leads que están en WAITING_FOR_EMAIL"
-   - "¿Cuál es la estructura del campo conversation_state?"
+
+- "Muéstrame leads que están en WAITING_FOR_EMAIL"
+- "¿Cuál es la estructura del campo conversation_state?"
 
 ### Instalación
 
@@ -424,9 +453,11 @@ Para mayor seguridad, puedes limitar el acceso solo a tu proyecto específico en
 ```
 
 **¿Dónde encuentro `project_ref`?**
+
 - En Supabase Dashboard → Settings → General → Reference ID
 
 **Ventajas del modo `readonly=true`:**
+
 - Solo consultas SELECT
 - No puede modificar o eliminar datos
 - Perfecto para exploración segura
@@ -436,6 +467,7 @@ Para mayor seguridad, puedes limitar el acceso solo a tu proyecto específico en
 Una vez configurado, puedes hacer preguntas directamente en Cursor:
 
 **Consultas de Datos:**
+
 ```
 // En Cursor Chat, escribe:
 "Muéstrame todos los leads de la última hora"
@@ -444,6 +476,7 @@ Una vez configurado, puedes hacer preguntas directamente en Cursor:
 ```
 
 **Exploración de Código:**
+
 ```
 "Explícame paso a paso cómo funciona kapso-webhook/index.ts"
 "¿Qué hace la función processMessage?"
@@ -451,6 +484,7 @@ Una vez configurado, puedes hacer preguntas directamente en Cursor:
 ```
 
 **Debugging:**
+
 ```
 "¿Por qué un lead podría quedarse en WAITING_FOR_EMAIL?"
 "Muéstrame los logs de error de la Edge Function"
@@ -458,6 +492,7 @@ Una vez configurado, puedes hacer preguntas directamente en Cursor:
 ```
 
 **Desarrollo:**
+
 ```
 "Crea una query para obtener leads de los últimos 7 días"
 "Ayúdame a agregar un campo 'telefono' a la tabla leads"
@@ -471,22 +506,27 @@ Una vez configurado, puedes hacer preguntas directamente en Cursor:
 **Recomendaciones clave:**
 
 1. **🚫 No conectes a producción**
+
    - Usa MCP solo en tu proyecto de desarrollo
    - Si tienes datos reales, usa una copia o datos de prueba
 
 2. **👥 No lo des a clientes**
+
    - MCP opera con tus permisos de desarrollador
    - Solo para uso interno del equipo
 
 3. **📖 Modo Read-Only**
+
    - Si trabajas con datos sensibles, usa `readonly=true`
    - Previene modificaciones accidentales
 
 4. **🎯 Scope al Proyecto**
+
    - Limita el acceso a un solo proyecto
    - Evita que el LLM acceda a otros proyectos
 
 5. **✋ Aprobación Manual**
+
    - Mantén activada la aprobación manual de tool calls en Cursor
    - Revisa cada acción antes de ejecutarla
 
@@ -520,6 +560,7 @@ La tabla 'leads' tiene los siguientes campos:
 ### Troubleshooting MCP
 
 **MCP no se conecta:**
+
 ```bash
 # Verifica que Cursor tenga la configuración correcta
 cat ~/.cursor/mcp.json
@@ -529,15 +570,18 @@ cat ~/.cursor/mcp.json
 ```
 
 **Error de autenticación:**
+
 - Revoca el acceso en [Supabase Dashboard](https://supabase.com/dashboard) → Settings → OAuth Apps
 - Vuelve a autorizar desde Cursor
 
 **No puede acceder a mi proyecto:**
+
 - Verifica que el `project_ref` sea correcto
 - Asegúrate de haber autorizado la organización correcta
 - Revisa que tu cuenta tenga permisos en el proyecto
 
 **Queries muy lentas:**
+
 - MCP hace queries reales a tu base de datos
 - Si tienes muchos datos, las queries pueden tardar
 - Considera agregar límites: "últimos 10 registros"
@@ -588,24 +632,30 @@ Los mensajes que Kapso envía al webhook tienen este formato:
 ```json
 {
   "object": "whatsapp_business_account",
-  "entry": [{
-    "changes": [{
-      "value": {
-        "messages": [{
-          "from": "1234567890",
-          "id": "wamid.xxx",
-          "timestamp": "1234567890",
-          "type": "text",
-          "text": {
-            "body": "Hola"
+  "entry": [
+    {
+      "changes": [
+        {
+          "value": {
+            "messages": [
+              {
+                "from": "1234567890",
+                "id": "wamid.xxx",
+                "timestamp": "1234567890",
+                "type": "text",
+                "text": {
+                  "body": "Hola"
+                }
+              }
+            ],
+            "metadata": {
+              "phone_number_id": "647015955153740"
+            }
           }
-        }],
-        "metadata": {
-          "phone_number_id": "647015955153740"
         }
-      }
-    }]
-  }]
+      ]
+    }
+  ]
 }
 ```
 
@@ -614,7 +664,7 @@ Los mensajes que Kapso envía al webhook tienen este formato:
 La función valida emails usando una expresión regular:
 
 ```typescript
-/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 ```
 
 Si el email es inválido, el bot pedirá que lo proporcione nuevamente.
@@ -646,10 +696,12 @@ Los botones se envían usando el formato de WhatsApp Interactive Messages:
 **Posibles causas:**
 
 1. **Webhook no configurado correctamente**
+
    - Verifica que la URL en Kapso apunte a tu Edge Function
    - Revisa que el webhook esté "Verified" en el Dashboard de Kapso
 
 2. **Edge Function con errores**
+
    - Revisa los logs: `supabase functions logs kapso-webhook`
    - Busca mensajes de error en rojo
 
@@ -658,6 +710,7 @@ Los botones se envían usando el formato de WhatsApp Interactive Messages:
    - Debe aparecer `KAPSO_API_KEY`
 
 **Solución:**
+
 ```bash
 # Re-desplegar la función
 supabase functions deploy kapso-webhook
@@ -671,10 +724,12 @@ supabase functions logs kapso-webhook --tail
 El email debe tener el formato correcto: `usuario@dominio.com`
 
 **Ejemplos válidos:**
+
 - ✅ juan@gmail.com
 - ✅ maria.lopez@empresa.com
 
 **Ejemplos inválidos:**
+
 - ❌ juan@gmail (falta extensión)
 - ❌ juan.com (falta @)
 - ❌ @gmail.com (falta usuario)
@@ -684,10 +739,12 @@ El email debe tener el formato correcto: `usuario@dominio.com`
 **Verifica:**
 
 1. **Credenciales de Supabase**
+
    - La Edge Function usa las credenciales automáticas de Supabase
    - No necesitas configurar nada adicional
 
 2. **Tabla creada correctamente**
+
    ```bash
    # Ver tablas en tu base de datos
    supabase db pull
@@ -702,15 +759,17 @@ El email debe tener el formato correcto: `usuario@dominio.com`
 **Causas:**
 
 1. **KAPSO_API_KEY incorrecto**
+
    ```bash
    # Actualizar el secret
    supabase secrets set KAPSO_API_KEY=tu_api_key_correcta
-   
+
    # Re-desplegar
    supabase functions deploy kapso-webhook
    ```
 
 2. **phoneNumberId inválido**
+
    - Verifica que el número esté conectado en Kapso Dashboard
    - Usa el ID del Sandbox si estás en pruebas
 
@@ -766,4 +825,3 @@ Este proyecto es de código abierto bajo la licencia MIT.
 **¿Preguntas o problemas?** Abre un issue en GitHub o consulta la documentación oficial de Kapso y Supabase.
 
 ¡Feliz coding! 🚀
-
