@@ -11,8 +11,10 @@ Este proyecto es un ejercicio práctico que demuestra cómo integrar **Kapso** (
 - [Paso 2: Configurar Kapso](#paso-2-configurar-kapso)
 - [Paso 3: Desplegar la Aplicación](#paso-3-desplegar-la-aplicación)
 - [Paso 4: Pruebas](#paso-4-pruebas)
+- [Bonus: Configurar MCP](#bonus-configurar-mcp-de-supabase-en-cursor)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Troubleshooting](#troubleshooting)
+- [Problemas Comunes y Soluciones](#problemas-comunes-y-soluciones)
 
 ## 🏗️ Arquitectura
 
@@ -786,6 +788,87 @@ WhatsApp tiene restricciones para mensajes interactivos:
 - Debe estar dentro de la ventana de 24 horas (mensajes proactivos)
 
 **Solución temporal**: Usar mensajes de texto simple en lugar de botones.
+
+## 🔧 Problemas Comunes y Soluciones
+
+Durante la implementación de este ejercicio, pueden surgir varios problemas. Aquí están los más comunes y sus soluciones:
+
+### 🚨 Error: Missing Authorization Header (401)
+
+Cuando despliegas la Edge Function y haces una petición de prueba:
+
+```bash
+curl https://tu-proyecto.supabase.co/functions/v1/kapso-webhook
+{"code":401,"message":"Missing authorization header"}
+```
+
+**Solución:** Desplegar con el flag `--no-verify-jwt`:
+```bash
+npx supabase functions deploy kapso-webhook --no-verify-jwt
+```
+
+### 🚨 Error 404 al Enviar Mensajes
+
+En los logs de Supabase ves:
+```
+Error al enviar mensaje: 404 The page you were looking for doesn't exist
+```
+
+**Causa:** Falta `/v21.0/` en la URL de la API de Kapso.
+
+**Solución:** La URL correcta debe ser:
+```
+https://api.kapso.ai/meta/whatsapp/v21.0/{phoneNumberId}/messages
+```
+
+### 🚨 Error: Invalid Credentials (401)
+
+```
+Error al enviar mensaje: 401 {"error":"Invalid credentials for WhatsApp configuration"}
+```
+
+**Causa:** Header de autorización incorrecto.
+
+**Solución:** Kapso usa `X-API-Key` no `Authorization: Bearer`. Verificar que el código use:
+```typescript
+headers: {
+  'X-API-Key': kapsoApiKey  // ✅ Correcto
+}
+```
+
+### 🚨 El Bot Saltó un Paso en la Conversación
+
+Enviaste "Hola" pero el bot pidió email en lugar de nombre.
+
+**Causa:** Ya existe un lead en la base de datos de una prueba anterior.
+
+**Solución:** Envía `reset` desde WhatsApp para reiniciar la conversación.
+
+### 🚨 Paquete @kapso/whatsapp-cloud-api No Se Instala
+
+```
+npm error notarget No matching version found for @kapso/whatsapp-cloud-api@^1.0.0
+```
+
+**Solución:** Usar la versión correcta `0.1.1`:
+```json
+"@kapso/whatsapp-cloud-api": "^0.1.1"
+```
+
+### 🚨 Supabase CLI No Se Instala con npm
+
+```
+npm error Installing Supabase CLI as a global module is not supported
+```
+
+**Solución:** Usar uno de estos métodos:
+- Homebrew: `brew install supabase/tap/supabase`
+- Binario directo desde [GitHub Releases](https://github.com/supabase/cli/releases)
+- npx: `npx supabase login`
+
+### 📖 Guía Completa de Troubleshooting
+
+Para una guía detallada con todos los problemas y soluciones, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ## 🎓 Siguientes Pasos
 
