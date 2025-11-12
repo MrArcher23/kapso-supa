@@ -328,7 +328,7 @@ async function sendWhatsAppMessage(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${kapsoApiKey}`
+        'X-API-Key': kapsoApiKey
       },
       body: JSON.stringify(payload)
     })
