@@ -1,13 +1,16 @@
 /**
  * Script de ejemplo para enviar mensaje inicial via Kapso
  * 
- * Este script demuestra cómo usar la API de Kapso (WhatsApp Cloud API) directamente
- * para enviar mensajes de WhatsApp de forma programática usando fetch.
+ * Este script demuestra cómo usar el SDK oficial de Kapso (@kapso/whatsapp-cloud-api)
+ * para enviar mensajes de WhatsApp de forma programática.
+ * 
+ * Documentación: https://docs.kapso.ai/docs/introduction
  * 
  * Uso:
  *   npm run example
  */
 
+import { WhatsAppClient } from '@kapso/whatsapp-cloud-api'
 import * as dotenv from 'dotenv'
 
 // Cargar variables de entorno
@@ -24,28 +27,11 @@ if (!KAPSO_API_KEY || !KAPSO_PHONE_NUMBER_ID) {
   process.exit(1)
 }
 
-/**
- * Función helper para hacer requests a la API de Kapso
- */
-async function kapsoRequest(endpoint: string, body: any) {
-  const url = `${KAPSO_BASE_URL}/${KAPSO_PHONE_NUMBER_ID}/${endpoint}`
-  
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${KAPSO_API_KEY}`
-    },
-    body: JSON.stringify(body)
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Kapso API Error: ${response.status} - ${error}`)
-  }
-
-  return response.json()
-}
+// Crear cliente de Kapso
+const client = new WhatsAppClient({
+  baseUrl: KAPSO_BASE_URL,
+  kapsoApiKey: KAPSO_API_KEY
+})
 
 /**
  * Envía un mensaje de texto simple
@@ -54,18 +40,11 @@ async function sendTextMessage(to: string, message: string) {
   try {
     console.log(`📤 Enviando mensaje a ${to}...`)
     
-    const payload = {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
+    const response = await client.messages.sendText({
+      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
       to: to,
-      type: 'text',
-      text: {
-        preview_url: false,
-        body: message
-      }
-    }
-
-    const response = await kapsoRequest('messages', payload)
+      body: message
+    })
 
     console.log('✅ Mensaje enviado exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -87,29 +66,23 @@ async function sendButtonMessage(
   try {
     console.log(`📤 Enviando mensaje con botones a ${to}...`)
     
-    const payload = {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
+    const response = await client.messages.sendInteractive({
+      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
       to: to,
-      type: 'interactive',
-      interactive: {
-        type: 'button',
-        body: {
-          text: bodyText
-        },
-        action: {
-          buttons: buttons.slice(0, 3).map(btn => ({
-            type: 'reply',
-            reply: {
-              id: btn.id,
-              title: btn.title.substring(0, 20) // Max 20 caracteres
-            }
-          }))
-        }
+      type: 'button',
+      body: {
+        text: bodyText
+      },
+      action: {
+        buttons: buttons.slice(0, 3).map(btn => ({
+          type: 'reply' as const,
+          reply: {
+            id: btn.id,
+            title: btn.title.substring(0, 20) // Max 20 caracteres
+          }
+        }))
       }
-    }
-
-    const response = await kapsoRequest('messages', payload)
+    })
 
     console.log('✅ Mensaje con botones enviado exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -127,18 +100,12 @@ async function sendImageMessage(to: string, imageUrl: string, caption?: string) 
   try {
     console.log(`📤 Enviando imagen a ${to}...`)
     
-    const payload = {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
+    const response = await client.messages.sendImage({
+      phoneNumberId: KAPSO_PHONE_NUMBER_ID!,
       to: to,
-      type: 'image',
-      image: {
-        link: imageUrl,
-        ...(caption && { caption })
-      }
-    }
-
-    const response = await kapsoRequest('messages', payload)
+      link: imageUrl,
+      ...(caption && { caption })
+    })
 
     console.log('✅ Imagen enviada exitosamente')
     console.log('ID del mensaje:', response.messages?.[0]?.id)
@@ -154,6 +121,7 @@ async function sendImageMessage(to: string, imageUrl: string, caption?: string) 
  */
 async function main() {
   console.log('🚀 Iniciando ejemplo de Kapso WhatsApp\n')
+  console.log('📚 Documentación: https://docs.kapso.ai/docs/introduction\n')
 
   // IMPORTANTE: Cambia este número por tu número de WhatsApp de prueba
   // Formato: código de país + número (sin +, espacios o guiones)
