@@ -4,48 +4,44 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
-// Tipos para los mensajes de Kapso
+// Tipos para los mensajes de Kapso (formato real)
 interface KapsoWebhookPayload {
-  object: string
-  entry: Array<{
+  message: {
+    context?: any
+    from: string
     id: string
-    changes: Array<{
-      value: {
-        messaging_product: string
-        metadata: {
-          display_phone_number: string
-          phone_number_id: string
-        }
-        contacts?: Array<{
-          profile: {
-            name: string
-          }
-          wa_id: string
-        }>
-        messages?: Array<{
-          from: string
-          id: string
-          timestamp: string
-          type: 'text' | 'interactive' | 'button'
-          text?: {
-            body: string
-          }
-          interactive?: {
-            type: string
-            button_reply?: {
-              id: string
-              title: string
-            }
-            list_reply?: {
-              id: string
-              title: string
-            }
-          }
-        }>
+    kapso: {
+      direction: string
+      status: string
+      processing_status: string
+      has_media: boolean
+      origin: string
+    }
+    text?: {
+      body: string
+    }
+    interactive?: {
+      button_reply?: {
+        id: string
+        title: string
       }
-      field: string
-    }>
-  }>
+      list_reply?: {
+        id: string
+        title: string
+      }
+    }
+    timestamp: string
+    type: 'text' | 'interactive' | 'button'
+  }
+  conversation: {
+    id: string
+    contact_name: string
+    phone_number: string
+    phone_number_id: string
+    status: string
+  }
+  is_new_conversation: boolean
+  phone_number_id: string
 }
 
 // Estados de la conversación
@@ -91,27 +87,14 @@ serve(async (req) => {
       const payload: KapsoWebhookPayload = await req.json()
       console.log('Webhook recibido:', JSON.stringify(payload, null, 2))
 
-      // Validar estructura del payload
-      if (!payload.entry || payload.entry.length === 0) {
-        return new Response('No entries', { status: 200 })
+      // Validar estructura del payload de Kapso
+      if (!payload.message) {
+        console.log('No hay mensaje en el payload')
+        return new Response('No message', { status: 200 })
       }
 
-      // Procesar cada entrada
-      for (const entry of payload.entry) {
-        for (const change of entry.changes) {
-          const { messages, metadata } = change.value
-
-          if (!messages || messages.length === 0) continue
-
-          // Procesar cada mensaje
-          for (const message of messages) {
-            await processMessage(
-              message,
-              metadata.phone_number_id
-            )
-          }
-        }
-      }
+      // Procesar el mensaje
+      await processMessage(payload)
 
       return new Response('OK', { status: 200 })
     }
@@ -124,10 +107,8 @@ serve(async (req) => {
 })
 
 // Función para procesar cada mensaje
-async function processMessage(
-  message: any,
-  phoneNumberId: string
-) {
+async function processMessage(payload: KapsoWebhookPayload) {
+  const { message, phone_number_id } = payload
   const from = message.from
   const messageType = message.type
   let messageBody = ''
@@ -275,7 +256,7 @@ async function processMessage(
 
   // Enviar respuesta al usuario vía Kapso
   await sendWhatsAppMessage(
-    phoneNumberId,
+    phone_number_id,
     from,
     responseMessage,
     useButtons,
@@ -283,7 +264,7 @@ async function processMessage(
   )
 }
 
-// Función para enviar mensaje de WhatsApp via Kapso
+// Función para enviar mensaje de WhatsApp via Kapso usando su API directamente
 async function sendWhatsAppMessage(
   phoneNumberId: string,
   to: string,
@@ -300,10 +281,11 @@ async function sendWhatsAppMessage(
   }
 
   try {
+    const url = `${kapsoBaseUrl}/${phoneNumberId}/messages`
     let payload: any
 
     if (useButtons && buttons.length > 0) {
-      // Mensaje con botones interactivos
+      // Mensaje con botones interactivos (formato de Kapso)
       payload = {
         messaging_product: 'whatsapp',
         recipient_type: 'individual',
@@ -315,7 +297,7 @@ async function sendWhatsAppMessage(
             text: message
           },
           action: {
-            buttons: buttons.map(btn => ({
+            buttons: buttons.slice(0, 3).map(btn => ({
               type: 'reply',
               reply: {
                 id: btn.id,
@@ -339,27 +321,26 @@ async function sendWhatsAppMessage(
       }
     }
 
-    const response = await fetch(
-      `${kapsoBaseUrl}/${phoneNumberId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${kapsoApiKey}`
-        },
-        body: JSON.stringify(payload)
-      }
-    )
+    console.log(`Enviando mensaje a ${to} via ${url}`)
+    console.log('Payload:', JSON.stringify(payload, null, 2))
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${kapsoApiKey}`
+      },
+      body: JSON.stringify(payload)
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Error al enviar mensaje:', response.status, errorText)
     } else {
       const result = await response.json()
-      console.log('Mensaje enviado exitosamente:', result.messages?.[0]?.id)
+      console.log('Mensaje enviado exitosamente:', JSON.stringify(result, null, 2))
     }
   } catch (error) {
     console.error('Error al enviar mensaje via Kapso:', error)
   }
 }
-
