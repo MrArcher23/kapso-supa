@@ -1,0 +1,437 @@
+{
+  "prompt": "Genera una presentación profesional en formato Markdown para crear un bot de WhatsApp con Kapso + Supabase. Cada diapositiva debe tener un título, contenido paso a paso, y un espacio marcado para captura de pantalla.",
+  "presentation_config": {
+    "title": "Integración Kapso WhatsApp + Supabase",
+    "subtitle": "Bot de Cualificación de Leads paso a paso",
+    "author": "Tu Nombre",
+    "theme": "professional"
+  },
+  "slides": [
+    {
+      "slide_number": 1,
+      "type": "title",
+      "title": "Integración Kapso WhatsApp + Supabase",
+      "subtitle": "Bot de Cualificación de Leads",
+      "description": "Crea un chatbot inteligente que captura y guarda leads automáticamente",
+      "screenshot_placeholder": "Logo de Kapso + Supabase"
+    },
+    {
+      "slide_number": 2,
+      "type": "architecture",
+      "title": "Arquitectura del Sistema",
+      "content": [
+        "WhatsApp → Kapso API → Supabase Edge Function → PostgreSQL",
+        "Conversación guiada con máquina de estados",
+        "Captura: Nombre, Email, Interés",
+        "Almacenamiento automático en base de datos"
+      ],
+      "screenshot_placeholder": "[CAPTURA: Diagrama de arquitectura]"
+    },
+    {
+      "slide_number": 3,
+      "type": "section_header",
+      "title": "Paso 1: Configurar Supabase",
+      "icon": "🗄️"
+    },
+    {
+      "slide_number": 4,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.1 Crear Proyecto en Supabase",
+      "steps": [
+        "Ve a https://supabase.com",
+        "Click en 'New Project'",
+        "Nombre: kapso-leads",
+        "Región: Selecciona la más cercana",
+        "Guarda la contraseña de la base de datos"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Dashboard de Supabase - Crear proyecto]"
+    },
+    {
+      "slide_number": 5,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.2 Instalar Supabase CLI",
+      "steps": [
+        "No usar: npm install -g supabase ❌",
+        "Usar: brew install supabase/tap/supabase ✅",
+        "O descargar binario desde GitHub",
+        "Verificar: supabase --version"
+      ],
+      "command": "brew install supabase/tap/supabase\nsupabase --version",
+      "screenshot_placeholder": "[CAPTURA: Terminal mostrando instalación exitosa]"
+    },
+    {
+      "slide_number": 6,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.3 Autenticar y Vincular Proyecto",
+      "steps": [
+        "Autenticar: supabase login (abre navegador)",
+        "Vincular: supabase link --project-ref TU_PROJECT_REF",
+        "Ingresar contraseña de la base de datos",
+        "Verificar: supabase status"
+      ],
+      "command": "supabase login\nsupabase link --project-ref ziaktzehdbfqyopkalqa",
+      "screenshot_placeholder": "[CAPTURA: Terminal mostrando proyecto vinculado]"
+    },
+    {
+      "slide_number": 7,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.4 Aplicar Migración de Base de Datos",
+      "steps": [
+        "Crear tabla 'leads' con campos:",
+        "• phone_number, name, email, interest",
+        "• conversation_state (JSONB)",
+        "• created_at, updated_at",
+        "Ejecutar: supabase db push"
+      ],
+      "command": "supabase db push",
+      "screenshot_placeholder": "[CAPTURA: Tabla 'leads' en Supabase Table Editor]"
+    },
+    {
+      "slide_number": 8,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.5 Desplegar Edge Function",
+      "steps": [
+        "La Edge Function procesa los mensajes de WhatsApp",
+        "Gestiona el estado de la conversación",
+        "Guarda datos en la base de datos",
+        "Responde automáticamente al usuario"
+      ],
+      "command": "supabase functions deploy kapso-webhook --no-verify-jwt",
+      "screenshot_placeholder": "[CAPTURA: Edge Function desplegada en dashboard]",
+      "important_note": "⚠️ Usar --no-verify-jwt para permitir webhooks externos"
+    },
+    {
+      "slide_number": 9,
+      "type": "step",
+      "section": "Supabase",
+      "title": "1.6 Configurar Secrets",
+      "steps": [
+        "Los secrets son variables de entorno seguras",
+        "KAPSO_API_KEY: Tu API key de Kapso",
+        "KAPSO_BASE_URL: URL de la API",
+        "Configurar con supabase secrets set"
+      ],
+      "command": "supabase secrets set KAPSO_API_KEY=tu_api_key_aqui\nsupabase secrets set KAPSO_BASE_URL=https://api.kapso.ai/meta/whatsapp",
+      "screenshot_placeholder": "[CAPTURA: Supabase secrets configurados]"
+    },
+    {
+      "slide_number": 10,
+      "type": "section_header",
+      "title": "Paso 2: Configurar Kapso",
+      "icon": "💬"
+    },
+    {
+      "slide_number": 11,
+      "type": "step",
+      "section": "Kapso",
+      "title": "2.1 Crear Cuenta en Kapso",
+      "steps": [
+        "Ve a https://dashboard.kapso.ai",
+        "Regístrate o inicia sesión",
+        "Completa la verificación de cuenta",
+        "Accede al dashboard principal"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Dashboard principal de Kapso]"
+    },
+    {
+      "slide_number": 12,
+      "type": "step",
+      "section": "Kapso",
+      "title": "2.2 Obtener API Key",
+      "steps": [
+        "Dashboard → Settings → API Keys",
+        "Click en 'Generate New API Key'",
+        "Copia la API Key (guárdala en lugar seguro)",
+        "Nunca la compartas públicamente ⚠️"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: API Key generada en Kapso (censurada)]"
+    },
+    {
+      "slide_number": 13,
+      "type": "step",
+      "section": "Kapso",
+      "title": "2.3 Conectar WhatsApp (Sandbox)",
+      "steps": [
+        "Dashboard → Sandbox",
+        "Verás un número de WhatsApp de prueba",
+        "Envía el código de verificación desde tu WhatsApp",
+        "Estado: Connected ✅"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Sandbox de Kapso con WhatsApp conectado]"
+    },
+    {
+      "slide_number": 14,
+      "type": "step",
+      "section": "Kapso",
+      "title": "2.4 Configurar Webhook",
+      "steps": [
+        "Dashboard → Webhooks → Add Webhook",
+        "URL: https://TU_PROJECT.supabase.co/functions/v1/kapso-webhook",
+        "Eventos: Marcar 'Message received' ✅",
+        "Guardar y verificar estado: Active"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Webhook configurado y activo]",
+      "important_note": "La URL debe terminar en /kapso-webhook"
+    },
+    {
+      "slide_number": 15,
+      "type": "section_header",
+      "title": "Paso 3: Configurar MCP (Opcional)",
+      "icon": "🤖"
+    },
+    {
+      "slide_number": 16,
+      "type": "step",
+      "section": "MCP",
+      "title": "3.1 ¿Qué es MCP?",
+      "steps": [
+        "Model Context Protocol",
+        "Permite consultar tu base de datos con lenguaje natural",
+        "Desde Cursor IDE directamente",
+        "Ideal para debugging y desarrollo"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Cursor Chat consultando base de datos]",
+      "examples": [
+        "\"Muéstrame los últimos 5 leads\"",
+        "\"¿Cuántos leads tengo por cada interés?\"",
+        "\"Explícame cómo funciona kapso-webhook\""
+      ]
+    },
+    {
+      "slide_number": 17,
+      "type": "step",
+      "section": "MCP",
+      "title": "3.2 Instalar MCP en Cursor",
+      "steps": [
+        "Supabase Dashboard → AI Tools → MCP",
+        "Click en 'Add to Cursor'",
+        "Autorizar en el navegador",
+        "Reiniciar Cursor"
+      ],
+      "command": null,
+      "screenshot_placeholder": "[CAPTURA: Supabase MCP configurado en Cursor]",
+      "alternative": "O editar manualmente ~/.cursor/mcp.json"
+    },
+    {
+      "slide_number": 18,
+      "type": "section_header",
+      "title": "Paso 4: Probar el Sistema",
+      "icon": "🧪"
+    },
+    {
+      "slide_number": 19,
+      "type": "demo",
+      "title": "Flujo de Conversación Completo",
+      "conversation": [
+        {
+          "sender": "Usuario",
+          "message": "Hola",
+          "description": "Inicia la conversación"
+        },
+        {
+          "sender": "Bot",
+          "message": "¡Bienvenido! 👋 ¿Cuál es tu nombre?",
+          "description": "Bot responde instantáneamente"
+        },
+        {
+          "sender": "Usuario",
+          "message": "Juan Pérez",
+          "description": "Proporciona su nombre"
+        },
+        {
+          "sender": "Bot",
+          "message": "Encantado, Juan Pérez. ¿Cuál es tu correo?",
+          "description": "Valida y continúa"
+        },
+        {
+          "sender": "Usuario",
+          "message": "juan@example.com",
+          "description": "Email validado"
+        },
+        {
+          "sender": "Bot",
+          "message": "¿En qué podemos ayudarte?\n[🛍️ Productos] [💰 Precios] [📞 Llamada]",
+          "description": "Botones interactivos"
+        },
+        {
+          "sender": "Usuario",
+          "message": "[Click en Llamada]",
+          "description": "Selecciona interés"
+        },
+        {
+          "sender": "Bot",
+          "message": "¡Gracias! Hemos registrado tu información ✅",
+          "description": "Datos guardados en Supabase"
+        }
+      ],
+      "screenshot_placeholder": "[CAPTURA: Conversación completa en WhatsApp]"
+    },
+    {
+      "slide_number": 20,
+      "type": "verification",
+      "title": "Verificar Datos en Supabase",
+      "steps": [
+        "Supabase Dashboard → Table Editor",
+        "Tabla: leads",
+        "Verificar campos:",
+        "• phone_number: 529933419833",
+        "• name: Juan Pérez",
+        "• email: juan@example.com",
+        "• interest: Agendar una llamada"
+      ],
+      "screenshot_placeholder": "[CAPTURA: Tabla leads con datos guardados]"
+    },
+    {
+      "slide_number": 21,
+      "type": "troubleshooting",
+      "title": "Problemas Comunes",
+      "issues": [
+        {
+          "problem": "Bot no responde",
+          "solution": "Verificar webhook activo y secrets configurados"
+        },
+        {
+          "problem": "Error 401",
+          "solution": "Usar --no-verify-jwt al desplegar"
+        },
+        {
+          "problem": "Error 404",
+          "solution": "URL debe incluir /v21.0/ en el path"
+        },
+        {
+          "problem": "Bot saltó un paso",
+          "solution": "Enviar 'reset' para reiniciar conversación"
+        }
+      ],
+      "screenshot_placeholder": "[CAPTURA: Logs de Supabase mostrando error resuelto]",
+      "note": "Ver TROUBLESHOOTING.md para más detalles"
+    },
+    {
+      "slide_number": 22,
+      "type": "commands",
+      "title": "Comandos Útiles de Referencia",
+      "categories": [
+        {
+          "category": "Supabase",
+          "commands": [
+            "supabase login",
+            "supabase link --project-ref REF",
+            "supabase db push",
+            "supabase functions deploy kapso-webhook --no-verify-jwt",
+            "supabase secrets set KEY=value"
+          ]
+        },
+        {
+          "category": "Verificación",
+          "commands": [
+            "supabase status",
+            "supabase functions list",
+            "supabase secrets list"
+          ]
+        },
+        {
+          "category": "Git",
+          "commands": [
+            "git add .",
+            "git commit -m 'mensaje'",
+            "git push origin main"
+          ]
+        }
+      ],
+      "screenshot_placeholder": "[CAPTURA: Terminal con comandos ejecutados]"
+    },
+    {
+      "slide_number": 23,
+      "type": "next_steps",
+      "title": "Siguientes Pasos",
+      "improvements": [
+        "🎨 Personalizar mensajes del bot",
+        "🔧 Agregar más campos (empresa, cargo, presupuesto)",
+        "🤖 Integrar con IA (GPT) para respuestas inteligentes",
+        "📊 Crear dashboard de analytics",
+        "📧 Enviar notificaciones por email/Slack",
+        "🌍 Soporte multi-idioma"
+      ],
+      "screenshot_placeholder": "[CAPTURA: Ideas de mejoras visualizadas]"
+    },
+    {
+      "slide_number": 24,
+      "type": "resources",
+      "title": "Recursos y Documentación",
+      "resources": [
+        {
+          "title": "Repositorio GitHub",
+          "url": "https://github.com/tu-usuario/kapso-supa"
+        },
+        {
+          "title": "Documentación de Kapso",
+          "url": "https://docs.kapso.ai"
+        },
+        {
+          "title": "Documentación de Supabase",
+          "url": "https://supabase.com/docs"
+        },
+        {
+          "title": "WhatsApp Business API",
+          "url": "https://developers.facebook.com/docs/whatsapp"
+        }
+      ],
+      "files": [
+        "README.md - Guía completa",
+        "TROUBLESHOOTING.md - Solución de problemas",
+        "INICIO_RAPIDO.md - Comandos rápidos",
+        "FLUJO_COMPLETO.md - Diagramas técnicos"
+      ],
+      "screenshot_placeholder": "[CAPTURA: Estructura de archivos del proyecto]"
+    },
+    {
+      "slide_number": 25,
+      "type": "closing",
+      "title": "¡Proyecto Completado! 🎉",
+      "summary": [
+        "✅ Bot funcional en WhatsApp",
+        "✅ Datos guardados automáticamente",
+        "✅ Conversación guiada paso a paso",
+        "✅ Documentación completa",
+        "✅ Ready para producción"
+      ],
+      "call_to_action": "Sube tu proyecto a GitHub y compártelo",
+      "screenshot_placeholder": "[CAPTURA: Proyecto funcionando end-to-end]"
+    }
+  ],
+  "usage_instructions": {
+    "for_llm": "Usa este JSON para generar una presentación en Markdown o HTML. Cada slide debe incluir el contenido estructurado y un espacio claramente marcado para insertar capturas de pantalla.",
+    "for_human": "Reemplaza cada [CAPTURA: ...] con tus propias capturas de pantalla del proceso. Usa herramientas como Reveal.js, Google Slides API, o Marp para renderizar.",
+    "format_options": [
+      "Markdown (para Marp o Slidev)",
+      "HTML (para Reveal.js)",
+      "PowerPoint XML",
+      "Google Slides (via API)"
+    ]
+  },
+  "styling_suggestions": {
+    "colors": {
+      "primary": "#3ECF8E",
+      "secondary": "#1E293B",
+      "accent": "#F59E0B"
+    },
+    "fonts": {
+      "heading": "Inter Bold",
+      "body": "Inter Regular",
+      "code": "JetBrains Mono"
+    },
+    "layout": "Use side-by-side layout for steps + screenshots"
+  }
+}
+
