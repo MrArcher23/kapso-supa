@@ -803,6 +803,7 @@ curl https://tu-proyecto.supabase.co/functions/v1/kapso-webhook
 ```
 
 **Solución:** Desplegar con el flag `--no-verify-jwt`:
+
 ```bash
 npx supabase functions deploy kapso-webhook --no-verify-jwt
 ```
@@ -810,6 +811,7 @@ npx supabase functions deploy kapso-webhook --no-verify-jwt
 ### 🚨 Error 404 al Enviar Mensajes
 
 En los logs de Supabase ves:
+
 ```
 Error al enviar mensaje: 404 The page you were looking for doesn't exist
 ```
@@ -817,6 +819,7 @@ Error al enviar mensaje: 404 The page you were looking for doesn't exist
 **Causa:** Falta `/v21.0/` en la URL de la API de Kapso.
 
 **Solución:** La URL correcta debe ser:
+
 ```
 https://api.kapso.ai/meta/whatsapp/v21.0/{phoneNumberId}/messages
 ```
@@ -830,6 +833,7 @@ Error al enviar mensaje: 401 {"error":"Invalid credentials for WhatsApp configur
 **Causa:** Header de autorización incorrecto.
 
 **Solución:** Kapso usa `X-API-Key` no `Authorization: Bearer`. Verificar que el código use:
+
 ```typescript
 headers: {
   'X-API-Key': kapsoApiKey  // ✅ Correcto
@@ -851,6 +855,7 @@ npm error notarget No matching version found for @kapso/whatsapp-cloud-api@^1.0.
 ```
 
 **Solución:** Usar la versión correcta `0.1.1`:
+
 ```json
 "@kapso/whatsapp-cloud-api": "^0.1.1"
 ```
@@ -862,6 +867,7 @@ npm error Installing Supabase CLI as a global module is not supported
 ```
 
 **Solución:** Usar uno de estos métodos:
+
 - Homebrew: `brew install supabase/tap/supabase`
 - Binario directo desde [GitHub Releases](https://github.com/supabase/cli/releases)
 - npx: `npx supabase login`
