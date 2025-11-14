@@ -48,6 +48,7 @@ interface KapsoWebhookPayload {
 enum ConversationStep {
   INITIAL = 'INITIAL',
   WAITING_FOR_NAME = 'WAITING_FOR_NAME',
+  WAITING_FOR_BUSINESS_NAME = 'WAITING_FOR_BUSINESS_NAME',
   WAITING_FOR_EMAIL = 'WAITING_FOR_EMAIL',
   WAITING_FOR_INTEREST = 'WAITING_FOR_INTEREST',
   COMPLETED = 'COMPLETED'
@@ -58,6 +59,7 @@ interface LeadData {
   step: ConversationStep
   data: {
     name?: string
+    business_name?: string
     email?: string
     interest?: string
   }
@@ -182,7 +184,13 @@ async function processMessage(payload: KapsoWebhookPayload) {
 
     case ConversationStep.WAITING_FOR_NAME:
       newState.data.name = messageBody
-      responseMessage = `Encantado, ${messageBody}. ¿Cuál es tu correo electrónico?`
+      responseMessage = `Encantado, ${messageBody}. ¿Cuál es el nombre de tu negocio o empresa? 🏢`
+      newState.step = ConversationStep.WAITING_FOR_BUSINESS_NAME
+      break
+
+    case ConversationStep.WAITING_FOR_BUSINESS_NAME:
+      newState.data.business_name = messageBody
+      responseMessage = `Perfecto, ${newState.data.name}. ¿Cuál es tu correo electrónico?`
       newState.step = ConversationStep.WAITING_FOR_EMAIL
       break
 
@@ -239,6 +247,7 @@ async function processMessage(payload: KapsoWebhookPayload) {
   // Si estamos en estado completado, guardar todos los datos
   if (newState.step === ConversationStep.COMPLETED) {
     updateData.name = newState.data.name
+    updateData.business_name = newState.data.business_name
     updateData.email = newState.data.email
     updateData.interest = newState.data.interest
   }
