@@ -49,6 +49,7 @@ enum ConversationStep {
   INITIAL = 'INITIAL',
   WAITING_FOR_NAME = 'WAITING_FOR_NAME',
   WAITING_FOR_BUSINESS_NAME = 'WAITING_FOR_BUSINESS_NAME',
+  WAITING_FOR_AGE = 'WAITING_FOR_AGE',
   WAITING_FOR_EMAIL = 'WAITING_FOR_EMAIL',
   WAITING_FOR_INTEREST = 'WAITING_FOR_INTEREST',
   COMPLETED = 'COMPLETED'
@@ -60,6 +61,7 @@ interface LeadData {
   data: {
     name?: string
     business_name?: string
+    age?: number
     email?: string
     interest?: string
   }
@@ -190,8 +192,21 @@ async function processMessage(payload: KapsoWebhookPayload) {
 
     case ConversationStep.WAITING_FOR_BUSINESS_NAME:
       newState.data.business_name = messageBody
-      responseMessage = `Perfecto, ${newState.data.name}. ¿Cuál es tu correo electrónico?`
-      newState.step = ConversationStep.WAITING_FOR_EMAIL
+      responseMessage = `Perfecto, ${newState.data.name}. ¿Cuántos años tienes? 🎂`
+      newState.step = ConversationStep.WAITING_FOR_AGE
+      break
+
+    case ConversationStep.WAITING_FOR_AGE:
+      // Validar que sea un número
+      const age = parseInt(messageBody)
+      if (isNaN(age) || age <= 0 || age >= 150) {
+        responseMessage = 'Por favor, proporciona una edad válida (número entre 1 y 149)'
+        // Mantener el mismo estado
+      } else {
+        newState.data.age = age
+        responseMessage = `Gracias, ${newState.data.name}. ¿Cuál es tu correo electrónico? 📧`
+        newState.step = ConversationStep.WAITING_FOR_EMAIL
+      }
       break
 
     case ConversationStep.WAITING_FOR_EMAIL:
@@ -248,6 +263,7 @@ async function processMessage(payload: KapsoWebhookPayload) {
   if (newState.step === ConversationStep.COMPLETED) {
     updateData.name = newState.data.name
     updateData.business_name = newState.data.business_name
+    updateData.age = newState.data.age
     updateData.email = newState.data.email
     updateData.interest = newState.data.interest
   }
